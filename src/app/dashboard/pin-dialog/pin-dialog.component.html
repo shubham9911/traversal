@@ -1,0 +1,26 @@
+<div class="header-container">
+  <h1 mat-dialog-title>Location : {{ dialogData.data?.title }}</h1>
+  <button class="m-2" mat-icon-button color="warn" (click)="delete()">
+    <i class="material-symbols-outlined">delete</i>
+  </button>
+</div>
+<div mat-dialog-content>
+  <div class="row">
+    <div class="col">
+      <h4>Notes</h4>
+      <form [formGroup]="form">
+        <div class="editor">
+          <ngx-editor-menu [editor]="editor" [toolbar]="toolbar">
+          </ngx-editor-menu>
+          <ngx-editor [editor]="editor" formControlName="editorContent">
+          </ngx-editor>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close>Close</button>
+
+  <button mat-flat-button color="success" (click)="savePinInfo()">Save</button>
+</div>
