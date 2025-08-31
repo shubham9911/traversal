@@ -1,15 +1,14 @@
 /**
- * Main Application Module for Traversal
+ * Main Application Module for Traversal Core
  * 
  * This is the root module that bootstraps the entire Angular application.
- * It imports and configures all necessary modules, components, and services
- * required for the Traversal map-based pin management system.
+ * It provides a clean boilerplate structure for Angular 18 applications
+ * with Node.js backend integration.
  * 
  * Key Features:
  * - Angular Material Design components
- * - HERE Maps integration
  * - User authentication system
- * - Dashboard for pin management
+ * - Dashboard for application management
  * - HTTP client for API communication
  * - Responsive design with CDK Overlay
  */
@@ -26,7 +25,6 @@ import { AppRoutingModule } from './app-routing.module';
 
 // Core components
 import { AppComponent } from './app.component';
-import { MapComponent } from './map/map.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 // Feature modules
@@ -37,9 +35,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
 
 @NgModule({
   declarations: [
-    AppComponent,    // Root application component
-    MapComponent,    // HERE Maps integration component
-    DashboardComponent // Main dashboard for pin management
+    AppComponent,      // Root application component
+    DashboardComponent // Main dashboard component
   ],
   imports: [
     // Angular core modules

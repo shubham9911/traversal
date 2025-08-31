@@ -1,124 +1,106 @@
-button.logout {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
-  font-size: 12px;
-}
-.search-container {
-  padding: 8px 16px;
-  background-color: #e8e8f2;
-  display: flex;
-  align-items: center;
-  border-radius: 8px;
-  mat-icon {
-    margin-right: 12px;
-  }
-  input {
-    outline: none;
-    border: none;
-    background: none;
-    font-weight: 400;
-  }
-}
-:ng-deep .mat-mdc-list-base {
-  width: 230px;
-  background-color: #e8e8f2;
-}
 .example-spacer {
   flex: 1 1 auto;
   justify-content: center;
   align-items: center;
   display: flex;
   gap: 10px;
-  .mat-mdc-form-field {
-    flex-direction: row;
-  }
-}
-// //Work Around for Mat hint error
-// :host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-//   display: none !important;
-// }
-// .mat-mdc-form-field-infix {
-//   width: 250px !important;
-// }
-.cards {
-  position: relative;
-  z-index: 999;
-}
-mat-card {
-  border-radius: 5px !important;
-
-  border-radius: 5px;
-}
-.pinnedCards {
-  // position: fixed;
-  // top: 11%;
-  // right: 4%;
-  z-index: 2;
-
-  width: 350px;
 }
 
-.dash-host {
-  position: fixed;
-  left: 0;
-  right: 0;
-  z-index: 1;
-  display: block;
-  background-image: url(../../assets/background.jpg);
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
-  /* Apply a blur effect to the background image */
-  filter: brightness(30%);
-  /* Set a background color in case the image is not available or takes time to load */
-  // background: linear-gradient(to right, #ffffff, #003b72);
-  /* Ensure the background covers the entire viewport */
-  height: 100vh;
+.dashboard-container {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome-section {
+  grid-column: 1 / -1;
+}
+
+.welcome-card {
+  border-radius: 8px !important;
+}
+
+.actions-section {
+  grid-column: 1;
+}
+
+.stats-section {
+  grid-column: 2;
+}
+
+.actions-card, .stats-card {
+  border-radius: 8px !important;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  flex: 1;
+  min-width: 120px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.stat-info h3 {
   margin: 0;
+  font-size: 24px;
+  color: #3f51b5;
 }
 
-.content {
-  position: fixed;
-  left: 0;
-  right: 0;
-  z-index: 2;
+.stat-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
 }
 
-.pin-card {
-  overflow-y: auto;
-  background-color: rgba(240, 240, 240, -0.5);
-  max-height: 70vh;
+.user-info {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
-.pin-card::-webkit-scrollbar {
-  width: 10px; /* Set the width of the scrollbar */
-}
+@media (max-width: 768px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+    padding: 10px;
+  }
 
-.pin-card::-webkit-scrollbar-thumb {
-  background-color: #5184f3; /* Set the color of the thumb */
-  border-radius: 5px; /* Set the radius of the thumb */
-}
+  .actions-section,
+  .stats-section {
+    grid-column: 1;
+  }
 
-.pin-card::-webkit-scrollbar-track {
-  background-color: #ffffff; /* Set the color of the track */
-  margin-top: 30px;
-  margin-bottom: 30px;
-  border-radius: 5px;
-}
+  .action-buttons {
+    flex-direction: column;
+  }
 
-/* Optional: Hide scrollbar track when not scrolling */
-.pin-card::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-}
+  .action-buttons button {
+    flex: none;
+  }
 
-.pin {
-  background-color: #7fc1ff;
-}
-.outerCard {
-  padding: 6px !important;
-}
-.cursor-pointer {
-  cursor: pointer;
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,7 +1,8 @@
 /**
- * API Routes for Traversal Application
+ * API Routes for Traversal Core Application
  * 
  * Handles authentication endpoints for user registration and login.
+ * This serves as a boilerplate for Node.js backend API endpoints.
  * Uses bcrypt for password hashing and MongoDB for data persistence.
  * 
  * Available endpoints:

@@ -1,9 +1,10 @@
 /**
- * Traversal Application Server
+ * Traversal Core Application Server
  * 
- * This is the main server file for the Traversal web application.
+ * This is the main server file for the Traversal Core boilerplate application.
  * It sets up an Express.js server with MongoDB connection, CORS configuration,
- * and handles user authentication routes for the map-based pin management system.
+ * and handles user authentication routes. This serves as a template for
+ * Node.js backend applications with Angular 18 frontend.
  * 
  * Features:
  * - Express.js web server
@@ -31,20 +32,24 @@ const server = http.createServer(app);
 /**
  * Database Configuration
  * 
- * Establishes connection to MongoDB Atlas database for the Traversal application.
- * The database stores user authentication data and potentially pin/location data.
+ * Establishes connection to MongoDB database.
+ * In a production environment, use environment variables for connection strings.
  * 
- * TODO: Move connection string to environment variables for security
+ * Example .env file:
+ * MONGODB_URI=mongodb://localhost:27017/your-database
+ * or
+ * MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database
  */
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/traversal-core";
+
 mongoose
-  .connect(
-    "mongodb+srv://mohan:PmxOIHXdPVXJ1WXq@cluster0.cscwhhu.mongodb.net/backfront?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(MONGODB_URI)
   .then(() => {
     console.log("✅ Successfully connected to MongoDB database");
   })
   .catch((error) => {
     console.error("❌ Database connection failed:", error.message);
+    console.error("💡 Make sure MongoDB is running or check your connection string");
     process.exit(1); // Exit if database connection fails
   });
 
@@ -100,7 +105,7 @@ app.set("port", PORT);
 
 // Start the HTTP server
 server.listen(PORT, () => {
-  console.log(`🚀 Traversal server is running on port ${PORT}`);
+  console.log(`🚀 Traversal Core server is running on port ${PORT}`);
   console.log(`📍 Access the application at http://localhost:${PORT}`);
 });
 

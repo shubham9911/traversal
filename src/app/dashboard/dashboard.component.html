@@ -1,98 +1,96 @@
 <mat-toolbar>
   <button mat-icon-button>
-    <i class="material-symbols-outlined" color="primary">travel_explore</i>
+    <mat-icon color="primary">dashboard</mat-icon>
   </button>
-  <span>Traversal</span>
-  <span class="example-spacer" *ngIf="MapRef">
-    <div
-      class="search-container"
-      cdkOverlayOrigin
-      #overlayPosition="cdkOverlayOrigin"
-    >
-      <mat-icon>search</mat-icon>
-      <input
-        type="text"
-        #search
-        (input)="MapRef.fillSearchOptions($event)"
-        placeholder="Search"
-        (click)="overlayOpen = true"
-      />
-    </div>
-    <ng-template
-      cdkConnectedOverlay
-      [cdkConnectedOverlayOrigin]="overlayPosition"
-      [cdkConnectedOverlayOpen]="overlayOpen"
-      (overlayOutsideClick)="overlayOpen = false"
-    >
-      <mat-action-list *ngIf="MapRef.searchOptions.length > 0">
-        <button
-          class="cursor-pointer"
-          mat-list-item
-          *ngFor="let location of MapRef.searchOptions"
-          (click)="
-            MapRef.searchLocation(location.address.label);
-            search.value = location.address.label
-          "
-        >
-          {{ location.address.label }}
-        </button>
-      </mat-action-list>
-    </ng-template>
-    <button
-      mat-icon-button
-      class="mat-primary"
-      cdkOverlayOrigin
-      #pinOverlay="cdkOverlayOrigin"
-      (click)="togglePinnedOverlay()"
-    >
-      <mat-icon> person_pin</mat-icon>
+  <span>{{ title }}</span>
+  
+  <span class="example-spacer">
+    <!-- Navigation buttons can be added here -->
+    <button mat-button (click)="navigateToSection('profile')">
+      <mat-icon>person</mat-icon>
+      Profile
     </button>
-    <ng-template
-      cdkConnectedOverlay
-      [cdkConnectedOverlayOrigin]="pinOverlay"
-      [cdkConnectedOverlayOpen]="pinOverlayOpen"
-      (overlayOutsideClick)="pinOverlayOpen = false"
-    >
-      <div class="pinnedCards">
-        <mat-card class="pin-card">
-          <mat-card-content class="outerCard">
-            <mat-card
-              class="my-2 cursor-pointer"
-              *ngFor="let index of markers; let i = index"
-              (click)="openPinDialog(index)"
-              ><mat-card-content>
-                <h4>{{ index.data.title }}</h4>
-                <p><b>Area :</b> {{ index.data.address.county }}</p>
-              </mat-card-content></mat-card
-            >
-            <mat-card class="my-2" *ngIf="!markers.length"
-              ><mat-card-content>
-                <h4>No Pins Added!</h4>
-                <p>Click on map to add pins</p>
-              </mat-card-content></mat-card
-            >
-          </mat-card-content>
-        </mat-card>
-      </div>
-    </ng-template>
+    <button mat-button (click)="navigateToSection('settings')">
+      <mat-icon>settings</mat-icon>
+      Settings
+    </button>
   </span>
 
   <button mat-icon-button color="warn" matTooltip="Logout" (click)="logout()">
-    <i class="material-symbols-outlined" color="primary">power_settings_new</i>
+    <mat-icon>power_settings_new</mat-icon>
   </button>
 </mat-toolbar>
-<div class="dash-host"></div>
-<div class="row content m-3">
-  <div class="col">
-    <mat-card>
-      <app-map
-        #mapComponent
-        [zoom]="zoom"
-        [lat]="lat"
-        [lng]="lng"
-        (notify)="handleMapChange($event)"
-        (hitPoint)="handleMapClick($event)"
-      ></app-map>
+
+<div class="dashboard-container">
+  <div class="welcome-section">
+    <mat-card class="welcome-card">
+      <mat-card-header>
+        <mat-card-title>Welcome to {{ title }}</mat-card-title>
+        <mat-card-subtitle>Hello, {{ user.name }}!</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>This is your dashboard. You can extend this template with your application-specific features.</p>
+        <div class="user-info">
+          <p><strong>Email:</strong> {{ user.email }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="actions-section">
+    <mat-card class="actions-card">
+      <mat-card-header>
+        <mat-card-title>Quick Actions</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="action-buttons">
+          <button mat-raised-button color="primary" (click)="performAction('create')">
+            <mat-icon>add</mat-icon>
+            Create New
+          </button>
+          <button mat-raised-button color="accent" (click)="performAction('manage')">
+            <mat-icon>manage_accounts</mat-icon>
+            Manage
+          </button>
+          <button mat-raised-button (click)="performAction('reports')">
+            <mat-icon>assessment</mat-icon>
+            View Reports
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="stats-section">
+    <mat-card class="stats-card">
+      <mat-card-header>
+        <mat-card-title>Statistics</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <mat-icon>trending_up</mat-icon>
+            <div class="stat-info">
+              <h3>0</h3>
+              <p>Total Items</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <mat-icon>people</mat-icon>
+            <div class="stat-info">
+              <h3>1</h3>
+              <p>Active Users</p>
+            </div>
+          </div>
+          <div class="stat-item">
+            <mat-icon>notifications</mat-icon>
+            <div class="stat-info">
+              <h3>0</h3>
+              <p>Notifications</p>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
     </mat-card>
   </div>
 </div>
