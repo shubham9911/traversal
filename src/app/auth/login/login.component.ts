@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -9,29 +9,38 @@ import { Router } from '@angular/router';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  hide = true;
-  loginForm = new FormGroup({
-    email: new FormControl(''),
-    password: new FormControl(''),
-  });
-  constructor(private router: Router, private httpclient: HttpClient) {}
-  login() {
-    const req = this.loginForm.value;
-    this.httpclient
-      .put('http://localhost:3000/api/login', req)
-      .subscribe((res: any) => {
-        console.log(res);
-        if (res.success) this.router.navigate(['dashboard']);
-      });
+  step: 'phone' | 'otp' = 'phone';
+  loading = false;
+  error = '';
+
+  phoneCtrl = new FormControl('', [Validators.required, Validators.pattern(/^\+?[1-9]\d{9,14}$/)]);
+  otpCtrl = new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]);
+
+  constructor(private auth: AuthService, private router: Router) {}
+
+  sendOtp() {
+    if (this.phoneCtrl.invalid) return;
+    this.loading = true;
+    this.error = '';
+    this.auth.sendOtp(this.phoneCtrl.value!).subscribe({
+      next: () => { this.step = 'otp'; this.loading = false; },
+      error: () => { this.error = 'Failed to send OTP. Try again.'; this.loading = false; },
+    });
   }
-  signup() {
-    const req = this.loginForm.value;
-    this.httpclient
-      .post('http://localhost:3000/api/signup', req)
-      .subscribe((res: any) => {
-        console.log(res);
-        if (res.success) this.router.navigate(['dashboard']);
-        alert(res.message);
-      });
+
+  verifyOtp() {
+    if (this.otpCtrl.invalid) return;
+    this.loading = true;
+    this.error = '';
+    this.auth.verifyOtp(this.phoneCtrl.value!, this.otpCtrl.value!).subscribe({
+      next: () => { this.router.navigate(['/dashboard']); },
+      error: () => { this.error = 'Invalid or expired OTP.'; this.loading = false; },
+    });
+  }
+
+  back() {
+    this.step = 'phone';
+    this.otpCtrl.reset();
+    this.error = '';
   }
 }
