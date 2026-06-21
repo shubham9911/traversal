@@ -30,11 +30,12 @@
           mat-list-item
           *ngFor="let location of MapRef.searchOptions"
           (click)="
-            MapRef.searchLocation(location.address.label);
-            search.value = location.address.label
+            MapRef.searchLocation(location);
+            search.value = location.display_name;
+            overlayOpen = false
           "
         >
-          {{ location.address.label }}
+          {{ location.display_name }}
         </button>
       </mat-action-list>
     </ng-template>

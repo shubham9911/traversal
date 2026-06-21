@@ -1,7 +1,5 @@
-import { Component, ViewChild, viewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { PinDialogComponent } from './pin-dialog/pin-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
 import { MapComponent } from '../map/map.component';
 
 @Component({
@@ -19,7 +17,7 @@ export class DashboardComponent {
   pinOverlayOpen = false;
   @ViewChild('mapComponent') MapRef: MapComponent;
   searchOptions: any;
-  constructor(private router: Router, private dialog: MatDialog) {
+  constructor(private router: Router) {
     this.zoom = 5;
     this.lat = 0;
     this.lng = 0;
@@ -28,30 +26,12 @@ export class DashboardComponent {
   logout() {
     this.router.navigate(['login']);
   }
-  // * Function Responsible for drag and zoom in the Here maps.
-  handleMapChange(event: H.map.ChangeEvent) {
-    if (event.newValue.lookAt) {
-      const lookAt = event.newValue.lookAt;
-      this.zoom = lookAt.zoom;
-      this.lat = lookAt.position.lat;
-      this.lng = lookAt.position.lng;
-    }
+  handleMapChange(event: any) {
+    // Leaflet map move/zoom — center and zoom tracked via @Input bindings
   }
-  openPinDialog(data: any) {
-    const dialogRef = this.dialog.open(PinDialogComponent, {
-      width: '900px',
-      data: { data: data.data },
-    });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
-      console.log(`Dialog result: ${result}`);
-      if (result) {
-        const markerToDelete = this.markers.find(
-          (mark) => data.data.id == mark.data.id
-        );
-        if (markerToDelete) this.MapRef.removeMarker(markerToDelete);
-      }
-    });
+  openPinDialog(data: any) {
+    // Pin list overlay click — dialog is handled directly from MapComponent marker tap
   }
   handleMapClick(event: any[]) {
     console.log(999, event);
