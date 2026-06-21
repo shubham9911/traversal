@@ -1,3 +1,29 @@
+/**
+ * Map Component for Traversal Application
+ * 
+ * This is the core component that integrates HERE Maps API to provide interactive
+ * mapping functionality for the Traversal application. It handles pin placement,
+ * location search, marker management, and map interactions.
+ * 
+ * Key Features:
+ * - HERE Maps integration with custom pin icons
+ * - Interactive pin placement via map clicks
+ * - Reverse geocoding for address resolution
+ * - Location search with autocomplete
+ * - Local storage persistence for pins
+ * - Pin editing and deletion dialogs
+ * - Responsive map controls and behaviors
+ * 
+ * Data Flow:
+ * - User clicks map → reverse geocode → create pin → store locally
+ * - User searches location → geocode → center map → show results
+ * - User interacts with pins → open dialog → edit/delete options
+ * 
+ * Storage:
+ * - Pins are persisted in browser localStorage for user convenience
+ * - Data structure: [latitude, longitude, geocoding_result]
+ */
+
 import {
   Component,
   ViewChild,
@@ -25,18 +51,60 @@ interface GeocodeResult {
 })
 export class MapComponent implements OnInit {
   private map?: any;
+  
+  /**
+   * HERE Maps Platform instance - provides API services
+   * Used for geocoding, search, and other HERE services
+   */
   private platform: any;
+  
+  // ==================== INPUT PROPERTIES ====================
+  
+  /** Current map zoom level (controlled by parent component) */
   @Input() public zoom = 2;
+  
+  /** Current map center latitude (controlled by parent component) */
   @Input() public lat = 0;
+  
+  /** Current map center longitude (controlled by parent component) */
   @Input() public lng = 0;
+  
+  // ==================== STATE MANAGEMENT ====================
+  
+  /** Flag to prevent duplicate marker creation during async operations */
   isMarker: boolean = false;
+  
+  /** Array of all active markers currently displayed on the map */
   markers: any[] = [];
   @ViewChild("map") mapDiv?: ElementRef;
   private timeoutHandle: any;
+  
+  /** Timer for debouncing search input */
+  searchTimer: any;
+  
+  // ==================== TEMPLATE REFERENCES ====================
+  
+  /** Reference to the HTML div element that contains the map */
+  @ViewChild('map') mapDiv?: ElementRef;
+  
+  // ==================== EVENT EMITTERS ====================
+  
+  /** Emits map view changes to parent component (zoom, pan, etc.) */
   @Output() notify = new EventEmitter();
+  
+  /** Emits marker array updates to parent component */
   @Output() hitPoint = new EventEmitter();
   searchQuery: string = "";
   searchOptions: any[] = [];
+  
+  /**
+   * Constructor - Initialize component with required services
+   * 
+   * @param dialog - Material Dialog service for opening pin dialogs
+   */
+  constructor(public dialog: MatDialog) {
+    console.log('🗺️ Map component initialized');
+  }
 
   constructor(public dialog: MatDialog, private pinService: PinService) {}
 
@@ -48,6 +116,7 @@ export class MapComponent implements OnInit {
       data: { data: pin },
     });
 
+    // Handle dialog result when user closes it
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result?.delete) {
         this.pinService.delete(pin.id).subscribe(() => this.removeMarker(marker));
@@ -58,12 +127,16 @@ export class MapComponent implements OnInit {
           pin.note = updated.note;
         });
       }
+      
+      // Reset marker flag to allow new marker creation
       this.isMarker = false;
     });
   }
 
   ngOnChanges(changes: SimpleChanges) {
     clearTimeout(this.timeoutHandle);
+    
+    // Debounce map updates to improve performance
     this.timeoutHandle = setTimeout(() => {
       if (this.map) {
         if (changes["zoom"] !== undefined) {
@@ -76,10 +149,11 @@ export class MapComponent implements OnInit {
           });
         }
       }
-    }, 100);
+    }, 100); // 100ms debounce delay
   }
 
   ngAfterViewInit(): void {
+    // Ensure we have a valid map container and haven't already initialized
     if (!this.map && this.mapDiv) {
       this.platform = new H["default"].service.Platform({
         apikey: "vJrfbfUY7UlHCvjAWR9maP3ggf9ES1dGcEBYaDNYAZ4",
@@ -123,7 +197,15 @@ export class MapComponent implements OnInit {
       new H["default"].mapevents.Behavior(
         new H["default"].mapevents.MapEvents(map)
       );
-    }
+      
+      console.log('👆 Map tapped at coordinates:', {
+        lat: coordinates.lat.toFixed(6),
+        lng: coordinates.lng.toFixed(6)
+      });
+      
+      // Perform reverse geocoding to get address information
+      this.reverseGeocode(coordinates.lat, coordinates.lng, this.platform);
+    });
   }
 
   // Place a marker on the map for an existing Pin (from API)
@@ -135,6 +217,9 @@ export class MapComponent implements OnInit {
       { lat: pin.lat, lng: pin.lng },
       { data: pin, icon }
     );
+    
+    console.log('🎮 Map behaviors enabled (pan, zoom, tap)');
+  }
 
     const self = this;
     marker.addEventListener("tap", function (evt: Event) {
@@ -184,6 +269,8 @@ export class MapComponent implements OnInit {
     if (event.target.value === "") return;
     if (this.searchTimer) clearTimeout(this.searchTimer);
     this.searchTimer = setTimeout(() => {
+      console.log('🔍 Searching for:', query);
+      
       const service = this.platform.getSearchService();
       service.geocode(
         { q: event.target.value },
@@ -192,7 +279,7 @@ export class MapComponent implements OnInit {
         },
         (error: any) => console.error("Search error:", error)
       );
-    }, 600);
+    }, 600); // 600ms debounce delay
   }
 
   searchLocation(event: any): void {
@@ -203,8 +290,13 @@ export class MapComponent implements OnInit {
       { q: event },
       (result: GeocodeResult) => {
         if (result.items.length > 0) {
-          this.map.setCenter(result.items[0].position);
-          this.map.setZoom(14);
+          const location = result.items[0];
+          console.log('📍 Centering map on:', location);
+          
+          this.map.setCenter(location.position);
+          this.map.setZoom(14); // Zoom in for detailed view
+        } else {
+          console.warn('⚠️ No results found for search query');
         }
         this.searchOptions = [];
       }
