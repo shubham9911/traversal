@@ -1,44 +1,49 @@
-<div class="main-content h-100 w-100">
-  <div class="container mt-4">
-    <div class="row justify-content-center">
-      <div class="d-flex justify-content-center">
-        <mat-card>
-            <mat-card-title>Login</mat-card-title>
-          <mat-card-content>
-            <form [formGroup]="loginForm">
-              <div class="row">
-                <div class="col-12">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Email</mat-label>
-                    <input matInput placeholder="pat@example.com" formControlName="email" required>
-                    <mat-error>Email is invalid</mat-error>
-                  </mat-form-field>
-                </div>
-                <div class="col-12">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Password</mat-label>
-                    <input matInput [type]="hide ? 'password' : 'text'" formControlName="password">
-                    <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-                      <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                    </button>
-                  </mat-form-field>
-                </div>
-              </div>
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <mat-icon class="brand-icon">travel_explore</mat-icon>
+      <h1>Traversal</h1>
+      <p>Pin your world. One note at a time.</p>
+    </div>
 
+    <!-- Step 1: Phone number -->
+    <div *ngIf="step === 'phone'">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Mobile Number</mat-label>
+        <mat-icon matPrefix>phone</mat-icon>
+        <input matInput [formControl]="phoneCtrl" placeholder="+91 98765 43210" type="tel" (keyup.enter)="sendOtp()" />
+        <mat-error *ngIf="phoneCtrl.hasError('required')">Phone number is required</mat-error>
+        <mat-error *ngIf="phoneCtrl.hasError('pattern')">Enter a valid phone number with country code</mat-error>
+      </mat-form-field>
 
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
 
-            </form>
+      <button mat-flat-button color="primary" class="full-width submit-btn" (click)="sendOtp()" [disabled]="loading">
+        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+        <span *ngIf="!loading">Send OTP</span>
+      </button>
+    </div>
 
+    <!-- Step 2: OTP -->
+    <div *ngIf="step === 'otp'">
+      <p class="otp-hint">OTP sent to <strong>{{ phoneCtrl.value }}</strong></p>
 
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-raised-button (click)="signup()"  >Signup</button>
-            <button mat-raised-button color="primary" (click)="login()">Login</button>
-          </mat-card-actions>
-        </mat-card>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Enter 6-digit OTP</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput [formControl]="otpCtrl" placeholder="123456" maxlength="6" type="number" (keyup.enter)="verifyOtp()" />
+        <mat-error *ngIf="otpCtrl.hasError('required')">OTP is required</mat-error>
+        <mat-error *ngIf="otpCtrl.hasError('minlength')">OTP must be 6 digits</mat-error>
+      </mat-form-field>
 
-      </div>
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
 
+      <button mat-flat-button color="primary" class="full-width submit-btn" (click)="verifyOtp()" [disabled]="loading">
+        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+        <span *ngIf="!loading">Verify & Continue</span>
+      </button>
+
+      <button mat-button class="full-width back-btn" (click)="back()">Change number</button>
     </div>
   </div>
 </div>

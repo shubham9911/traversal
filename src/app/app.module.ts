@@ -35,6 +35,13 @@ import { GeneralModule } from './general/general.module';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+
+
 @NgModule({
   declarations: [
     AppComponent,    // Root application component
@@ -42,24 +49,27 @@ import { DashboardModule } from './dashboard/dashboard.module';
     DashboardComponent // Main dashboard for pin management
   ],
   imports: [
-    // Angular core modules
-    BrowserModule,              // Essential browser support
-    BrowserAnimationsModule,    // Animations for Material Design
-    HttpClientModule,          // HTTP client for API calls
-    OverlayModule,             // CDK overlay for dialogs and popups
-    
-    // Application modules
-    AppRoutingModule,          // Navigation and routing
-    MaterialModule,            // Angular Material components
-    GeneralModule,             // Shared/general components
-    AuthModule,                // User authentication features
-    DashboardModule           // Dashboard functionality
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    MaterialModule,
+    GeneralModule,
+    AuthModule,
+    HttpClientModule,
+    DashboardModule,
+    OverlayModule,
+    ReactiveFormsModule,
   ],
   providers: [
     {
       // Configure Material form fields for dynamic sizing
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { subscriptSizing: 'dynamic' },
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
     },
   ],
   bootstrap: [AppComponent], // Component to load when app starts
