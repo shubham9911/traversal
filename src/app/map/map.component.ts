@@ -107,14 +107,25 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   openDialog(pin: Pin, marker: L.Marker) {
+    // Save current view before zooming in
+    const previousCenter = this.map!.getCenter();
+    const previousZoom = this.map!.getZoom();
+
+    // Fly to pin at max zoom
+    this.map!.flyTo([pin.lat, pin.lng], 18, { animate: true, duration: 0.8 });
+
     const dialogRef = this.dialog.open(PinDialogComponent, {
       width: "750px",
       data: { data: pin },
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
+      // Restore previous view on close
+      this.map!.flyTo(previousCenter, previousZoom, { animate: true, duration: 0.8 });
+
       if (result?.delete) {
         this.pinService.delete(pin.id).subscribe(() => this.removeMarker(pin.id, marker));
+        return;
       }
       if (result?.info !== undefined) {
         this.pinService.update(pin.id, pin.title, result.info).subscribe((updated) => {
@@ -134,7 +145,10 @@ export class MapComponent implements OnInit, OnDestroy {
 
     const marker = L.marker([pin.lat, pin.lng], { icon })
       .addTo(this.map!)
-      .on("click", () => this.openDialog(pin, marker));
+      .on("click", (e: L.LeafletMouseEvent) => {
+        L.DomEvent.stopPropagation(e);
+        this.openDialog(pin, marker);
+      });
 
     this.markerMap.set(pin.id, marker);
     this.emitMarkers();

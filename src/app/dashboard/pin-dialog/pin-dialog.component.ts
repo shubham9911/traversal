@@ -52,10 +52,13 @@ export class PinDialogComponent implements OnInit, OnDestroy {
   }
   ngOnInit(): void {
     if (this.dialogData.data.note) {
-      this.form.get('editorContent').patchValue(this.dialogData.data.note);
-      console.log(this.dialogData.data.note);
-    } else {
-      this.editor = new Editor();
+      try {
+        // note is stored as JSON string in the DB — parse it back to ProseMirror doc
+        const doc = JSON.parse(this.dialogData.data.note);
+        this.form.get('editorContent').patchValue(doc);
+      } catch {
+        // fallback: leave default placeholder
+      }
     }
   }
 
@@ -76,6 +79,8 @@ export class PinDialogComponent implements OnInit, OnDestroy {
     this.dialogRef.close({ delete: true });
   }
   savePinInfo() {
-    this.dialogRef.close({ info: this.form.get('editorContent').value });
+    // Stringify ProseMirror doc to JSON string before sending to API
+    const content = this.form.get('editorContent').value;
+    this.dialogRef.close({ info: JSON.stringify(content) });
   }
 }
