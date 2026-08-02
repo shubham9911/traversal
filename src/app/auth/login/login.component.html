@@ -31,7 +31,7 @@
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Enter 6-digit OTP</mat-label>
         <mat-icon matPrefix>lock</mat-icon>
-        <input matInput [formControl]="otpCtrl" placeholder="123456" maxlength="6" type="number" (keyup.enter)="verifyOtp()" />
+        <input matInput [formControl]="otpCtrl" placeholder="123456" maxlength="6" type="text" inputmode="numeric" (keyup.enter)="verifyOtp()" />
         <mat-error *ngIf="otpCtrl.hasError('required')">OTP is required</mat-error>
         <mat-error *ngIf="otpCtrl.hasError('minlength')">OTP must be 6 digits</mat-error>
       </mat-form-field>
