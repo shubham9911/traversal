@@ -1,71 +1,98 @@
+/**
+ * Pin Dialog Component for Traversal Application
+ *
+ * This component provides a rich text editor dialog for creating and editing
+ * notes associated with map pins. Users can document their travel experiences,
+ * thoughts, or any information related to specific locations.
+ *
+ * Key Features:
+ * - Rich text editor with formatting options (bold, italic, headers, etc.)
+ * - Color and alignment controls
+ * - List and quote formatting
+ * - Save and delete functionality
+ * - Integration with pin data storage
+ *
+ * The component uses ngx-editor for rich text editing capabilities and
+ * Angular Material Dialog for the modal interface.
+ */
+
 import {
   Component,
   OnDestroy,
   OnInit,
   ViewEncapsulation,
   Inject,
-} from '@angular/core';
-import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
-import { Validators, Editor, Toolbar } from 'ngx-editor';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+} from "@angular/core";
+import { AbstractControl, FormControl, FormGroup } from "@angular/forms";
+import { Validators, Editor, Toolbar } from "ngx-editor";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 
 @Component({
-  selector: 'app-pin-dialog',
-  templateUrl: './pin-dialog.component.html',
-  styleUrls: ['./pin-dialog.component.scss'],
+  selector: "app-pin-dialog",
+  templateUrl: "./pin-dialog.component.html",
+  styleUrls: ["./pin-dialog.component.scss"],
 })
 export class PinDialogComponent implements OnInit, OnDestroy {
+  /**
+   * Default Editor Document Structure
+   *
+   * Defines the initial content structure for the rich text editor.
+   * Creates a heading with placeholder text to guide users.
+   */
   editorDoc = {
-    type: 'doc',
+    type: "doc",
     content: [
       {
-        type: 'heading',
+        type: "heading",
         attrs: {
           level: 1,
           align: null,
         },
         content: [
           {
-            type: 'text',
-            text: 'Write something about your adventures....',
+            type: "text",
+            text: "Write something about your adventures....",
           },
         ],
       },
     ],
   };
+
+  /**
+   * Rich Text Editor Instance
+   *
+   * The main editor instance provided by ngx-editor.
+   * Handles all rich text editing functionality.
+   */
   editor: Editor = new Editor();
 
+  /**
+   * Editor Toolbar Configuration
+   *
+   * Defines the toolbar layout and available formatting options.
+   * Organized in groups for better user experience:
+   * - Basic formatting (bold, italic)
+   * - Text decoration (underline, strikethrough)
+   * - Content blocks (quotes, lists)
+   * - Headers (h1-h6)
+   * - Colors and alignment
+   */
   toolbar: Toolbar = [
-    ['bold', 'italic'],
-    ['underline', 'strike'],
-    ['blockquote'],
-    ['ordered_list', 'bullet_list'],
-    [{ heading: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }],
-    ['text_color', 'background_color'],
-    ['align_left', 'align_center', 'align_right', 'align_justify'],
+    ["bold", "italic"], // Basic text formatting
+    ["underline", "strike"], // Text decoration
+    ["blockquote"], // Quote blocks
+    ["ordered_list", "bullet_list"], // Lists
+    [{ heading: ["h1", "h2", "h3", "h4", "h5", "h6"] }], // Headers
+    ["text_color", "background_color"], // Color options
+    ["align_left", "align_center", "align_right", "align_justify"], // Alignment
   ];
-  constructor(
-    public dialogRef: MatDialogRef<PinDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public dialogData: any
-  ) {
-    this.editor = new Editor();
-  }
-  ngOnInit(): void {
-    if (this.dialogData.data.note) {
-      try {
-        // note is stored as JSON string in the DB — parse it back to ProseMirror doc
-        const doc = JSON.parse(this.dialogData.data.note);
-        this.form.get('editorContent').patchValue(doc);
-      } catch {
-        // fallback: leave default placeholder
-      }
-    }
-  }
 
-  ngOnDestroy(): void {
-    this.editor.destroy();
-  }
-
+  /**
+   * Form Group for Editor Content
+   *
+   * Angular reactive form to manage the editor content with validation.
+   * Ensures that users provide some content before saving.
+   */
   form = new FormGroup({
     editorContent: new FormControl(
       { value: this.editorDoc, disabled: false },
@@ -73,14 +100,62 @@ export class PinDialogComponent implements OnInit, OnDestroy {
     ),
   });
 
-  // * Save Pin Info
+  /**
+   * Constructor - Initialize dialog with data and editor
+   *
+   * @param dialogRef - Reference to the Material Dialog for closing/communication
+   * @param dialogData - Data passed to the dialog (pin information)
+   */
+  constructor(
+    public dialogRef: MatDialogRef<PinDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public dialogData: any
+  ) {
+    this.editor = new Editor();
+    console.log("📝 Pin dialog initialized with data:", dialogData);
+  }
+  /**
+   * Component Initialization
+   *
+   * Called after component construction. Loads existing pin note data
+   * if available, or initializes a fresh editor instance.
+   */
+  ngOnInit(): void {
+    // Check if the pin already has notes/content
+    if (this.dialogData.data.note) {
+      try {
+        // note is stored as JSON string in the DB — parse it back to ProseMirror doc
+        const doc = JSON.parse(this.dialogData.data.note);
+        this.form.get("editorContent").patchValue(doc);
+      } catch {
+        // fallback: leave default placeholder
+      }
+    }
+  }
 
-  delete() {
+  /**
+   * Component Cleanup
+   *
+   * Called when component is destroyed. Properly disposes of the editor
+   * instance to prevent memory leaks.
+   */
+  ngOnDestroy(): void {
+    console.log("🧹 Cleaning up pin dialog editor");
+    this.editor.destroy();
+  }
+
+  /**
+   * Delete Pin Action
+   *
+   * Closes the dialog and signals that the pin should be deleted.
+   * The parent component will handle the actual deletion logic.
+   */
+  delete(): void {
+    console.log("🗑️ User requested pin deletion");
     this.dialogRef.close({ delete: true });
   }
   savePinInfo() {
     // Stringify ProseMirror doc to JSON string before sending to API
-    const content = this.form.get('editorContent').value;
+    const content = this.form.get("editorContent").value;
     this.dialogRef.close({ info: JSON.stringify(content) });
   }
 }

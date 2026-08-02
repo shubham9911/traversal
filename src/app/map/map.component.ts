@@ -1,3 +1,29 @@
+/**
+ * Map Component for Traversal Application
+ *
+ * This is the core component that integrates HERE Maps API to provide interactive
+ * mapping functionality for the Traversal application. It handles pin placement,
+ * location search, marker management, and map interactions.
+ *
+ * Key Features:
+ * - HERE Maps integration with custom pin icons
+ * - Interactive pin placement via map clicks
+ * - Reverse geocoding for address resolution
+ * - Location search with autocomplete
+ * - Local storage persistence for pins
+ * - Pin editing and deletion dialogs
+ * - Responsive map controls and behaviors
+ *
+ * Data Flow:
+ * - User clicks map → reverse geocode → create pin → store locally
+ * - User searches location → geocode → center map → show results
+ * - User interacts with pins → open dialog → edit/delete options
+ *
+ * Storage:
+ * - Pins are persisted in browser localStorage for user convenience
+ * - Data structure: [latitude, longitude, geocoding_result]
+ */
+
 import {
   Component,
   ViewChild,
@@ -19,12 +45,12 @@ import { HttpClient } from "@angular/common/http";
 // Fix default marker icon broken by webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'assets/location-pin.png',
-  iconUrl: 'assets/location-pin.png',
+  iconRetinaUrl: "assets/location-pin.png",
+  iconUrl: "assets/location-pin.png",
   iconSize: [40, 40],
   iconAnchor: [20, 40],
   popupAnchor: [0, -40],
-  shadowUrl: '',
+  shadowUrl: "",
 });
 
 @Component({
@@ -44,6 +70,8 @@ export class MapComponent implements OnInit, OnDestroy {
   private timeoutHandle: any;
 
   @Output() notify = new EventEmitter();
+
+  /** Emits marker array updates to parent component */
   @Output() hitPoint = new EventEmitter();
 
   searchQuery: string = "";
@@ -85,7 +113,8 @@ export class MapComponent implements OnInit, OnDestroy {
     });
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
     }).addTo(this.map);
 
@@ -119,25 +148,33 @@ export class MapComponent implements OnInit, OnDestroy {
       data: { data: pin },
     });
 
+    // Handle dialog result when user closes it
     dialogRef.afterClosed().subscribe((result: any) => {
       // Restore previous view on close
-      this.map!.flyTo(previousCenter, previousZoom, { animate: true, duration: 0.8 });
+      this.map!.flyTo(previousCenter, previousZoom, {
+        animate: true,
+        duration: 0.8,
+      });
 
       if (result?.delete) {
-        this.pinService.delete(pin.id).subscribe(() => this.removeMarker(pin.id, marker));
+        this.pinService
+          .delete(pin.id)
+          .subscribe(() => this.removeMarker(pin.id, marker));
         return;
       }
       if (result?.info !== undefined) {
-        this.pinService.update(pin.id, pin.title, result.info).subscribe((updated) => {
-          pin.note = updated.note;
-        });
+        this.pinService
+          .update(pin.id, pin.title, result.info)
+          .subscribe((updated) => {
+            pin.note = updated.note;
+          });
       }
     });
   }
 
   placeMarker(pin: Pin) {
     const icon = L.icon({
-      iconUrl: 'assets/location-pin.png',
+      iconUrl: "assets/location-pin.png",
       iconSize: [40, 40],
       iconAnchor: [20, 40],
       popupAnchor: [0, -40],
@@ -169,11 +206,17 @@ export class MapComponent implements OnInit, OnDestroy {
     this.http.get<any>(url).subscribe({
       next: (result) => {
         if (result?.display_name) {
-          const title = result.display_name.split(",").slice(0, 2).join(",").trim();
+          const title = result.display_name
+            .split(",")
+            .slice(0, 2)
+            .join(",")
+            .trim();
           const address = result.display_name;
-          this.pinService.create(lat, lng, title, "", address).subscribe((pin) => {
-            this.placeMarker(pin);
-          });
+          this.pinService
+            .create(lat, lng, title, "", address)
+            .subscribe((pin) => {
+              this.placeMarker(pin);
+            });
         } else {
           this.dialog.open(ConfirmDialogComponent);
         }
@@ -185,10 +228,15 @@ export class MapComponent implements OnInit, OnDestroy {
   // Search via Nominatim
   fillSearchOptions(event: any) {
     const q = event.target.value;
-    if (!q) { this.searchOptions = []; return; }
+    if (!q) {
+      this.searchOptions = [];
+      return;
+    }
     if (this.searchTimer) clearTimeout(this.searchTimer);
     this.searchTimer = setTimeout(() => {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5`;
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+        q
+      )}&format=json&limit=5`;
       this.http.get<any[]>(url).subscribe((results) => {
         this.searchOptions = results;
       });
